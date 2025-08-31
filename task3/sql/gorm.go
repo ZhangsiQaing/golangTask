@@ -9,11 +9,12 @@ import (
 
 // User 用户
 type User struct {
-	ID        uint      `gorm:"primaryKey;autoIncrement"`
-	Name      string    `gorm:"size:100;not null"`
-	Email     string    `gorm:"size:100;uniqueIndex;not null"`
-	CreatedAt time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP"`
-	UpdatedAt time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP"`
+	ID         uint      `gorm:"primaryKey;autoIncrement"`
+	Name       string    `gorm:"size:100;not null"`
+	Email      string    `gorm:"size:100;uniqueIndex;not null"`
+	PostNumber uint      `gorm:"not null"`
+	CreatedAt  time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP"`
+	UpdatedAt  time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP"`
 
 	PostList []Post
 }
@@ -21,9 +22,10 @@ type User struct {
 // Post 文章
 type Post struct {
 	ID        uint      `gorm:"primaryKey;autoIncrement"`
-	Title     string    `gorm:"size:200;not null"`
-	Content   string    `gorm:"type:text;not null"`
-	UserID    uint      `gorm:"not null"`
+	Title     string    `gorm:"size:200;not null;default:''"` // 默认空字符串
+	Content   string    `gorm:"size:200;not null;default:''"` // 默认空字符串
+	UserID    uint      `gorm:"not null;default:0"`           // 默认0
+	Status    string    `gorm:"size:20;not null;default:''"`
 	CreatedAt time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP"`
 	UpdatedAt time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP"`
 
@@ -33,8 +35,9 @@ type Post struct {
 // Comment 评论
 type Comment struct {
 	ID        uint      `gorm:"primaryKey;autoIncrement"`
-	Content   string    `gorm:"type:text;not null"`
-	PostID    uint      `gorm:"not null"`
+	Content   string    `gorm:"size:200;not null;default:''"`         // 默认空字符串
+	PostID    uint      `gorm:"not null;default:0"`                   // 默认0
+	Status    string    `gorm:"type:varchar(20);not null;default:''"` // 默认空字符串
 	CreatedAt time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP"`
 	UpdatedAt time.Time `gorm:"type:timestamp;not null;default:CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP"`
 }
