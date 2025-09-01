@@ -1,0 +1,421 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Blog API",
+    "description": "博客系统的完整API文档",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "本地开发环境"
+    }
+  ],
+  "paths": {
+    "/users/signup": {
+      "post": {
+        "tags": ["用户管理"],
+        "summary": "用户注册",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "email", "password", "confirmPassword"],
+                "properties": {
+                  "username": {"type": "string", "example": "张三"},
+                  "email": {"type": "string", "format": "email", "example": "zhangsan@example.com"},
+                  "password": {"type": "string", "example": "password123"},
+                  "confirmPassword": {"type": "string", "example": "password123"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "注册成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {"type": "string", "example": "注册成功"},
+                    {"$ref": "#/components/schemas/ErrorResponse"}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "tags": ["用户管理"],
+        "summary": "用户登录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {"type": "string", "format": "email", "example": "zhangsan@example.com"},
+                  "password": {"type": "string", "example": "password123"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登录成功",
+            "headers": {
+              "x-jwt-token": {
+                "description": "JWT认证token",
+                "schema": {"type": "string"}
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/LoginResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts/list": {
+      "get": {
+        "tags": ["文章管理"],
+        "summary": "获取所有文章列表",
+        "responses": {
+          "200": {
+            "description": "获取文章列表成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/PostListResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts/{id}": {
+      "get": {
+        "tags": ["文章管理"],
+        "summary": "获取文章详情",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer", "minimum": 1},
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取文章成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/PostDetailResponse"}
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["文章管理"],
+        "summary": "更新文章",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer", "minimum": 1},
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/UpdatePostRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新文章成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/SuccessResponse"}
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["文章管理"],
+        "summary": "删除文章",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer", "minimum": 1},
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "删除文章成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/SuccessResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts/user/{userId}": {
+      "get": {
+        "tags": ["文章管理"],
+        "summary": "获取指定用户的文章列表",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer", "minimum": 1},
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取用户文章成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/PostListResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts/create": {
+      "post": {
+        "tags": ["文章管理"],
+        "summary": "创建文章",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/CreatePostRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创建文章成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/SuccessResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/post/{postId}": {
+      "get": {
+        "tags": ["评论管理"],
+        "summary": "获取某篇文章的所有评论",
+        "parameters": [
+          {
+            "name": "postId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer", "minimum": 1},
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取评论列表成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/CommentListResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/create": {
+      "post": {
+        "tags": ["评论管理"],
+        "summary": "创建评论",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/CreateCommentRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创建评论成功",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/SuccessResponse"}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "errorCode": {"type": "string", "example": "param_error"},
+          "message": {"type": "string", "example": "参数错误"}
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "errorCode": {"type": "string", "example": ""},
+          "message": {"type": "string", "example": "操作成功"}
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "errorCode": {"type": "string", "example": ""},
+          "message": {"type": "string", "example": "登录成功"},
+          "data": {
+            "type": "object",
+            "properties": {
+              "token": {"type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
+            }
+          }
+        }
+      },
+      "CreatePostRequest": {
+        "type": "object",
+        "required": ["title", "content"],
+        "properties": {
+          "title": {"type": "string", "maxLength": 255, "example": "我的第一篇博客文章"},
+          "content": {"type": "string", "example": "这是文章的内容..."}
+        }
+      },
+      "UpdatePostRequest": {
+        "type": "object",
+        "required": ["title", "content"],
+        "properties": {
+          "title": {"type": "string", "maxLength": 255, "example": "更新后的文章标题"},
+          "content": {"type": "string", "example": "更新后的文章内容..."}
+        }
+      },
+      "PostListResponse": {
+        "type": "object",
+        "properties": {
+          "errorCode": {"type": "string", "example": ""},
+          "message": {"type": "string", "example": "获取文章列表成功"},
+          "data": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/PostSummary"}
+          }
+        }
+      },
+      "PostDetailResponse": {
+        "type": "object",
+        "properties": {
+          "errorCode": {"type": "string", "example": ""},
+          "message": {"type": "string", "example": "获取文章成功"},
+          "data": {"$ref": "#/components/schemas/PostDetail"}
+        }
+      },
+      "PostSummary": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer", "example": 1},
+          "title": {"type": "string", "example": "我的第一篇博客文章"},
+          "content": {"type": "string", "example": "这是文章的内容..."},
+          "user_id": {"type": "integer", "example": 1},
+          "author": {"type": "string", "example": "张三"},
+          "created_at": {"type": "string", "format": "date-time", "example": "2024-01-01T00:00:00Z"},
+          "updated_at": {"type": "string", "format": "date-time", "example": "2024-01-01T00:00:00Z"}
+        }
+      },
+      "PostDetail": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer", "example": 1},
+          "title": {"type": "string", "example": "我的第一篇博客文章"},
+          "content": {"type": "string", "example": "这是文章的内容..."},
+          "user_id": {"type": "integer", "example": 1},
+          "author": {"type": "string", "example": "张三"},
+          "created_at": {"type": "string", "format": "date-time", "example": "2024-01-01T00:00:00Z"},
+          "updated_at": {"type": "string", "format": "date-time", "example": "2024-01-00:00:00Z"}
+        }
+      },
+      "CreateCommentRequest": {
+        "type": "object",
+        "required": ["content", "post_id"],
+        "properties": {
+          "content": {"type": "string", "example": "这是一条评论"},
+          "post_id": {"type": "integer", "minimum": 1, "example": 1}
+        }
+      },
+      "CommentListResponse": {
+        "type": "object",
+        "properties": {
+          "errorCode": {"type": "string", "example": ""},
+          "message": {"type": "string", "example": "获取评论列表成功"},
+          "data": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/CommentSummary"}
+          }
+        }
+      },
+      "CommentSummary": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer", "example": 1},
+          "content": {"type": "string", "example": "这是一条评论"},
+          "user_id": {"type": "integer", "example": 1},
+          "post_id": {"type": "integer", "example": 1},
+          "author": {"type": "string", "example": "李四"},
+          "created_at": {"type": "string", "format": "date-time", "example": "2024-01-01T00:00:00Z"},
+          "updated_at": {"type": "string", "format": "date-time", "example": "2024-01-01T00:00:00Z"}
+        }
+      }
+    }
+  },
+  "tags": [
+    {"name": "用户管理", "description": "用户注册、登录等认证相关接口"},
+    {"name": "文章管理", "description": "文章的创建、读取、更新、删除等操作"},
+    {"name": "评论管理", "description": "评论的创建、读取等操作"}
+  ]
+}
